@@ -65,6 +65,7 @@
     "less-loader": "^10.2.0",
     "long": "^5.2.0",
     "mini-css-extract-plugin": "^2.4.5",
+    "mobx": "^6.6.2",
     "mobx-react": "^7.3.0",
     "mobx-react-lite": "^3.3.0",
     "moment": "^2.29.1",

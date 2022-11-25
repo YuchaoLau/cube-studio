@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<head>
+
+  <meta charset="UTF-8">
+  <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
+
+  <title>File Dropper</title>
+</head>
+<body>
+
+  <form
+      method="POST"
+      action="/upload"
+      class="dropzone"
+      id="my-dropzone"
+      enctype="multipart/form-data">
+  </form>
+
+  <script type="application/javascript">
+      Dropzone.options.dropper = {
+          paramName: "file",
+          // chunking: true,
+          // forceChunking: true,
+          url: "/upload",
+          maxFilesize: 10*1024, //  单位：M
+          maxFiles: 3,           //一次性上传的文件数量上限
+          dictMaxFilesExceeded: "您最多只能上传3个文件！"
+
+          // chunkSize: 2000000 // bytes 
+      }
+  </script>
+</body>
+</html>

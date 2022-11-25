@@ -123,6 +123,13 @@ def upgrade():
     sa.ForeignKeyConstraint(['created_by_fk'], ['ab_user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('lyctest',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('test_name', sa.String(length=300), nullable=True),
+    sa.Column('test_num', sa.Integer(), nullable=True),
+    sa.Column('des', sa.String(length=300), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('etl_pipeline',
     sa.Column('created_on', sa.DateTime(), nullable=True),
     sa.Column('changed_on', sa.DateTime(), nullable=True),
@@ -231,6 +238,7 @@ def downgrade():
     op.drop_table('model')
     op.drop_table('etl_pipeline')
     op.drop_table('metadata_metric')
+    op.drop_table('lyctest')
     op.drop_table('dataset')
     op.drop_table('metadata_table')
     op.drop_table('dimension')

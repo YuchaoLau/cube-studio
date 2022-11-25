@@ -1,6 +1,7 @@
 from . import base
 from . import home
 from . import route
+# from . import outlinkView
 from . import view_team
 from . import view_notebook
 from . import view_images
@@ -18,9 +19,11 @@ from . import view_service_pipeline
 from . import view_link
 from . import view_metadata
 from . import view_metadata_metric
+from . import view_lyctest
 from . import view_dimension
 from . import view_etl_pipeline
 from . import view_dataset
+
 from .log import views
 from .log import api as log_api
 

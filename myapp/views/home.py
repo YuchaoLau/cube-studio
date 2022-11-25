@@ -5,6 +5,7 @@ from flask import (
     Markup,
     redirect,
     Response,
+    url_for
 )
 from myapp.utils.py.py_k8s import K8s
 import datetime
@@ -12,7 +13,7 @@ from flask import jsonify
 from myapp import conf
 from myapp.views.base import BaseMyappView
 
-from flask_appbuilder import expose
+from flask_appbuilder import expose, BaseView
 from myapp import appbuilder
 from flask import stream_with_context, request
 
@@ -80,6 +81,7 @@ class Myapp(BaseMyappView):
     def menu(self):
 
         menu=[
+            # 项目空间
             {
                 "name": 'group',
                 "title": '项目空间',
@@ -244,6 +246,15 @@ class Myapp(BaseMyappView):
                         "isExpand": True,
                         "children": [
                             {
+                                "name": 'upload',
+                                "title": '上传数据',
+                                "icon": '<svg t="1658320508784" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3263" width="200" height="200"><path d="M875.65 912h-380a36 36 0 0 1 0-72h380a36 36 0 1 1 0 72zM812.26 284.82L285.39 811.69l-88.11 15.1L212 738l526.72-526.72 73.54 73.54m90.51-11.31L750 120.77a16 16 0 0 0-22.62 0L152.5 695.68a34.11 34.11 0 0 0-9.5 18.56l-25.95 156.23a32 32 0 0 0 37 36.78l155.38-26.62a34.2 34.2 0 0 0 18.38-9.52l575-575a16 16 0 0 0 0-22.63z" p-id="3264"></path></svg>',
+                                "menu_type": "iframe",
+                                # "menu_type": "out_link",
+                                # "disable": True,
+                                "url": "/myapp/upload_page"
+                            },
+                            {
                                 "name": 'dataset',
                                 "title": '数据集',
                                 "icon": '<svg t="1658320455412" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2287" width="200" height="200"><path d="M685.6 444l171.7 68.7-354.8 141.9-337.2-141.9 175-73.7-37.3-17-208.6 90.7 408.1 177.4 425.8-177.4-201.7-84-41 15.3z m0 230.7l171.7 68.7-354.8 141.9-337.2-141.9 175-73.7-37.4-17-208.5 90.7 408.1 177.4 425.8-177.4-201.7-84-41 15.3zM928.3 282L502.5 104.6 94.4 282l408.1 177.4L928.3 282z m-763 0l337.1-141.9L857.3 282 502.5 424 165.3 282z m586.1 17.8V282L503 388.5 254.5 282v17.7L503 406.2l248.4-106.4z" fill="" p-id="2288"></path></svg>',
@@ -251,15 +262,16 @@ class Myapp(BaseMyappView):
                                 "url": "/dataset_modelview/api/"
                             },
                             {
-                                "name": 'label_platform',
-                                "title": '标注平台',
+                                # "name": 'test',
+                                "title": '数据标注平台', 
                                 "icon": '<svg t="1658320508784" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3263" width="200" height="200"><path d="M875.65 912h-380a36 36 0 0 1 0-72h380a36 36 0 1 1 0 72zM812.26 284.82L285.39 811.69l-88.11 15.1L212 738l526.72-526.72 73.54 73.54m90.51-11.31L750 120.77a16 16 0 0 0-22.62 0L152.5 695.68a34.11 34.11 0 0 0-9.5 18.56l-25.95 156.23a32 32 0 0 0 37 36.78l155.38-26.62a34.2 34.2 0 0 0 18.38-9.52l575-575a16 16 0 0 0 0-22.63z" p-id="3264"></path></svg>',
-                                "menu_type": "api",
-                                "disable": True,
-                                "url": "/metadata_table_modelview/api/"
+                                "menu_type": "out_link",
+                                # "url": 'https://www.baidu.com/'
+                                # "url": 'http://10.10.20.234:8088/'
+                                "url": 'http://10.10.20.233:8089/'
                             }
-                        ]
-                    },
+                        ] 
+                    }
 
 
                 ]
@@ -709,7 +721,6 @@ class Myapp(BaseMyappView):
                 ))
 
 
-
     @expose("/web/debug/<cluster_name>/<namespace>/<pod_name>/<container_name>", methods=["GET", "POST"])
     def web_debug(self,cluster_name,namespace,pod_name,container_name):
         cluster=conf.get('CLUSTERS',{})
@@ -1037,10 +1048,27 @@ class Myapp(BaseMyappView):
         return jsonify({})
 
 
-# add_view_no_menu添加视图，但是没有菜单栏显示
+    @expose('upload_page') 
+    def upload_page(self):
+        return self.render_template('upload.html')
+
+# add_view_no_menu添加视图，但是没有菜单栏显示 
 appbuilder.add_view_no_menu(Myapp)
 
 
+# # 数据表视图
+# class TestView(BaseView):
+#     # 相对路径的url
+#     route_base = '/'
 
+#     @expose('/annotation/_info') 
+#     def annotation(self):
+#         # return redirect(url_for('Myapp.welcome'))
+#         return self.render_template('annotation.html')
+#         # return redirect('/pipeline_modelview/web/%s' % username)
+#         # return 'hello'
+#         # return redirect('https://www.baidu.com')
+#         # return redirect('http://10.10.20.234:8088')
 
+# appbuilder.add_view_no_menu(TestView()) 
 

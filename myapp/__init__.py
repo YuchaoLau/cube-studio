@@ -152,9 +152,10 @@ if conf.get("ENABLE_TIME_ROTATE"):
     logging.getLogger().addHandler(handler)
 
 if conf.get("ENABLE_CORS"):
-    from flask_cors import CORS
-
+    from flask_cors import CORS 
     CORS(app, **conf.get("CORS_OPTIONS"))
+
+
 
 if conf.get("ENABLE_PROXY_FIX"):
     app.wsgi_app = ProxyFix(app.wsgi_app)
@@ -173,6 +174,11 @@ if conf.get("ENABLE_CHUNK_ENCODING"):
             return self.app(environ, start_response)
 
     app.wsgi_app = ChunkedEncodingFix(app.wsgi_app)
+
+
+app.config['UPLOAD_FOLDER'] = '/upload'
+app.config['MAX_CONTENT_PATH'] = 20*1024*1024*1024
+# app.config['UPLOAD_EXTENSIONS'] = ['.jpg', '.png', '.gif']
 
 if conf.get("UPLOAD_FOLDER"):
     try:

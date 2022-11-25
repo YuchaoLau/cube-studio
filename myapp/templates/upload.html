@@ -1,0 +1,40 @@
+{% extends "appbuilder/base.html" %}
+{#引入自定义css#}
+{% block head_css %}
+{{ super() }}
+<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
+{% endblock %}
+{# 在模板首部导入js文件，使用 head_js #}
+{% block head_js %}
+{{ super() }}
+<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<!-- <form method="POST"  class="dropzone" id="dropzone" enctype="multipart/form-data">
+</form> -->
+
+<div class="dropzone" id="myDropzone" style="width:300px;height: 200px;">
+  <div class="am-text-success dz-message">
+      将文件拖拽到此处<br>或点击上传
+  </div>
+</div>
+<script type="application/javascript">
+  Dropzone.options.myDropzone = {
+    paramName: "file",
+    // chunking: true,
+    // forceChunking: true,
+    url: "/upload",
+    maxFilesize: 10 * 1024, //  单位：M
+    maxFiles: 3,           //一次性上传的文件数量上限
+    dictMaxFilesExceeded: "您最多只能上传3个文件！" 
+    // chunkSize: 2000000 // bytes 
+  }
+</script>
+{% endblock %}
+
+
+{# 在模板末尾导入js文件，使用tail_js#}
+{% block tail_js %}
+{{ super() }}
+{% endblock %}
