@@ -122,7 +122,8 @@ def upgrade():
     sa.ForeignKeyConstraint(['changed_by_fk'], ['ab_user.id'], ),
     sa.ForeignKeyConstraint(['created_by_fk'], ['ab_user.id'], ),
     sa.PrimaryKeyConstraint('id')
-    )
+    )  
+      
     op.create_table('lyctest',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('test_name', sa.String(length=300), nullable=True),

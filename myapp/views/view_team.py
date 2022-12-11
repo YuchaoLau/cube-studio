@@ -49,7 +49,7 @@ class Project_User_ModelView_Base():
             description='只有creator可以添加修改组成员，可以添加多个creator',
             validators=[DataRequired()]
         )
-    }
+    } 
     edit_form_extra_fields = add_form_extra_fields
 
     # @pysnooper.snoop()

@@ -176,9 +176,9 @@ if conf.get("ENABLE_CHUNK_ENCODING"):
     app.wsgi_app = ChunkedEncodingFix(app.wsgi_app)
 
 
-app.config['UPLOAD_FOLDER'] = '/upload'
-app.config['MAX_CONTENT_PATH'] = 20*1024*1024*1024
-# app.config['UPLOAD_EXTENSIONS'] = ['.jpg', '.png', '.gif']
+app.config['UPLOAD_FOLDER'] = '/home/myapp/upload/'
+app.config['MAX_CONTENT_PATH'] = 10*1024*1024*1024  # 最大10G
+# app.config['UPLOAD_EXTENSIONS'] = ['.zip', '.tar', '.rar, '.gz', '.jar', '.png']
 
 if conf.get("UPLOAD_FOLDER"):
     try:

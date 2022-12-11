@@ -4,34 +4,41 @@
 {{ super() }}
 <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
 {% endblock %}
-{# 在模板首部导入js文件，使用 head_js #}
+{# 在模板首部导入js文件 #}
 {% block head_js %}
 {{ super() }}
 <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
 {% endblock %}
 
 {% block content %}
-<!-- <form method="POST"  class="dropzone" id="dropzone" enctype="multipart/form-data">
-</form> -->
 
-<div class="dropzone" id="myDropzone" style="width:300px;height: 200px;">
-  <div class="am-text-success dz-message">
-      将文件拖拽到此处<br>或点击上传
+<div>
+  <h3>数据集名称：{{name}}</h3>
+  <div>
+    <div class="dropzone" id="myDropzone"">
+      <div class="am-text-success dz-message">
+        拖拽文件<br>或点击上传文件<br><br>支持文件类型：zip，rar，tar，jar，gz
+      </div>
+    </div>
   </div>
 </div>
+
 <script type="application/javascript">
   Dropzone.options.myDropzone = {
     paramName: "file",
     // chunking: true,
     // forceChunking: true,
-    url: "/upload",
+    url: "/dataset_modelview/upload_dataset/{{id}}",
     maxFilesize: 10 * 1024, //  单位：M
-    maxFiles: 3,           //一次性上传的文件数量上限
-    dictMaxFilesExceeded: "您最多只能上传3个文件！" 
+    maxFiles: 1,           //一次性上传的文件数量上限
+    acceptedFiles: ".rar,.zip,.tar,.jar,.gz在,.png",
+    dictMaxFilesExceeded: "一次最多只能上传1个文件！",
+    dictFileTooBig:"可添加的最大文件大小为{{10 * 1024}}Mb，当前文件大小为{{filesize}}Mb ",
     // chunkSize: 2000000 // bytes 
   }
 </script>
 {% endblock %}
+
 
 
 {# 在模板末尾导入js文件，使用tail_js#}

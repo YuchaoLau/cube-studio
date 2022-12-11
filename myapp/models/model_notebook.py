@@ -31,8 +31,8 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
     describe = Column(String(200), nullable=True)
     namespace = Column(String(200), nullable=True,default='jupyter')
     images=Column(String(200), nullable=True,default='')
-    ide_type = Column(String(100), default='jupyter')
-    working_dir = Column(String(200), default='')  # 挂载
+    ide_type = Column(String(100), default='jupyter')   # 网页编辑器类型
+    working_dir = Column(String(200), default='')       # 挂载
     volume_mount = Column(String(400), default='kubeflow-user-workspace(pvc):/mnt,kubeflow-archives(pvc):/archives')  # 挂载
     node_selector = Column(String(200), default='cpu=true,notebook=true')  # 挂载
     image_pull_policy = Column(Enum('Always', 'IfNotPresent'), nullable=True, default='Always')
@@ -133,5 +133,6 @@ class Notebook(Model,AuditMixinNullable,MyappModelBase):
     @property
     def reset(self):
         return Markup(f'<a href="/notebook_modelview/reset/{self.id}">reset</a>')
+        # return Markup(f'<button>测试一下</button>')
 
 

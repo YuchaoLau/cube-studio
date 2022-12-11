@@ -548,6 +548,4 @@ class Notebook_ModelView_Api(Notebook_ModelView_Base,MyappModelRestApi):
     datamodel = SQLAInterface(Notebook)
     route_base = '/notebook_modelview/api'
 
-
-
 appbuilder.add_api(Notebook_ModelView_Api)

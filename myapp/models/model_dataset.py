@@ -4,12 +4,15 @@ from sqlalchemy import Text
 
 from myapp.models.helpers import AuditMixinNullable
 from myapp import app
-from sqlalchemy import Column, Integer, String
-from flask import Markup
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
+from flask import Markup, url_for, send_file
+
 from myapp.models.base import MyappModelBase
 metadata = Model.metadata
 conf = app.config
-
+from flask_appbuilder.filemanager import get_file_original_name
+from flask_appbuilder.models.mixins import FileColumn
 
 
 class Dataset(Model,AuditMixinNullable,MyappModelBase):
@@ -39,13 +42,10 @@ class Dataset(Model,AuditMixinNullable,MyappModelBase):
     entries_num = Column(String(200), nullable=True, default='')  # 记录数目
     duration = Column(String(200), nullable=True, default='')  # 时长
     price = Column(String(200), nullable=True, default='0')  # 价格
-
-
-
-    owner = Column(String(200),nullable=True)  #
-
+    owner = Column(String(200),nullable=True)  
     expand = Column(Text(65536), nullable=True,default='{}')
-
+    dataset_file = Column(String(500), nullable=True)
+    
     def __repr__(self):
         return self.name
 
@@ -74,3 +74,18 @@ class Dataset(Model,AuditMixinNullable,MyappModelBase):
             if url.strip():
                 html += '<a target=_blank href="%s">%s</a><br>' % (url.strip(), url.strip())
         return Markup('<div>%s</div>'%html)
+
+    # 上传
+    def upload_dataset(self):
+        return Markup(f'<a target=_blank href="/dataset_modelview/upload_dataset_page/{self.id}/{self.name}">点击上传</a>')
+    
+
+    def download(self):
+        if self.dataset_file != None:
+            return Markup('<a href="' + url_for("Dataset_ModelView.download", filename=str(self.dataset_file)) + '">点击下载</a>')
+        else:
+            return Markup('未上传')
+
+    # def file_name(self):
+    #     return get_file_original_name(str(self.dataset_file))
+    

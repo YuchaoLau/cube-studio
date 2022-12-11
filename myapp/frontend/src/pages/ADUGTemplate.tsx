@@ -1001,7 +1001,7 @@ export default function TaskListManager(props?: IAppMenuItem) {
                                         }
 
                                     </Menu>}>
-                                        <Button>批量操作 <DownOutlined /></Button>
+                                        <Button>批量操作<DownOutlined /></Button>
                                     </Dropdown>
                                 </div>
                                 {
@@ -1104,4 +1104,3 @@ export default function TaskListManager(props?: IAppMenuItem) {
         </div >
     );
 }
-

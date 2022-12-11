@@ -2,18 +2,30 @@
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_babel import lazy_gettext as _
 from wtforms.validators import DataRequired
-from myapp import app, appbuilder
+from myapp import app, appbuilder, db
 from wtforms import StringField, SelectField
 from flask_appbuilder.fieldwidgets import BS3TextFieldWidget, Select2Widget
 from myapp.forms import MyBS3TextAreaFieldWidget,MySelect2Widget
-
+from flask_appbuilder.actions import action
+from flask_babel import gettext as __
+from flask_appbuilder import expose
+from flask import Flask, redirect, request, send_from_directory, send_file, flash
 from .baseApi import MyappModelRestApi
+from .base import MyappModelView
 from flask import g
-
 from myapp.models.model_dataset import Dataset
+import os
+
+
+# from flask import render_template
+# from flask_appbuilder.views import ModelView
+from flask_appbuilder.upload import BS3FileUploadFieldWidget, FileUploadField
+from flask_appbuilder.filemanager import FileManager
+from werkzeug.utils import secure_filename
+from flask_login import current_user
+
 conf = app.config
 logging = app.logger
-
 
 
 
@@ -22,13 +34,14 @@ class Dataset_ModelView_base():
     label_title='数据集'
     datamodel = SQLAInterface(Dataset)
     base_permissions = ['can_add','can_show','can_edit','can_list','can_delete']
-
+    # base_permissions = []
+    # can_show： 详情页
     base_order = ("id", "desc")
     order_columns=['id']
 
-    add_columns = ['name','label','describe','source_type','source','industry','field','usage','research','storage_class','file_type','years','url','download_url','path','storage_size','entries_num','duration','price','status','icon','owner']
-    show_columns = ['id','name','label','describe','source_type','source','industry','field','usage','research','storage_class','file_type','status','years','url','path','download_url','storage_size','entries_num','duration','price','status','icon','owner']
-    search_columns=['name','label','describe','source_type','source','industry','field','usage','research','storage_class','file_type','status','years','url','path','download_url']
+    add_columns = ['name','label','describe', 'source_type','source','industry','field','usage','research','storage_class','file_type','years','url','download_url','path','storage_size','entries_num','duration','price','status','icon','owner']
+    show_columns = ['id','name','label','describe', 'dataset_file', 'download', 'source_type','source','industry','field','usage','research','storage_class','file_type','status','years','url','path','download_url','storage_size','entries_num','duration','price','status','icon','owner']
+    search_columns=['name','label','describe', 'source_type', 'source','industry','field','usage','research','storage_class','file_type','status','years','url','path','download_url']
     spec_label_columns = {
         "source_type":"来源类型",
         "source":"数据来源",
@@ -41,16 +54,20 @@ class Dataset_ModelView_base():
         "url_html": "相关网址",
         "download_url":"下载地址",
         "download_url_html": "下载地址",
-        "path":"本地路径",
+        # "path":"本地路径",
         "entries_num":"条目数量",
         "duration":"文件时长",
         "price": "价格",
         "icon": "示例图",
         "icon_html":"示例图",
+        "download": "下载",
+        "upload_dataset": "上传",
+        "dataset_file": "文件名"
     }
+    
 
     edit_columns = add_columns
-    list_columns = ['icon_html','name','label','describe','source_type','source','status','industry','field','url_html','download_url_html','usage','research','storage_class','file_type','years','path','storage_size','entries_num','duration','price','owner']
+    list_columns = ['icon_html','name','label', 'upload_dataset', 'download', 'describe', 'source_type','source','status','industry','field','url_html','download_url_html','usage','research','storage_class','file_type','years','path','storage_size','entries_num','duration','price','owner']
     cols_width = {
         "name": {"type": "ellip1", "width": 200},
         "label": {"type": "ellip2", "width": 250},
@@ -61,7 +78,7 @@ class Dataset_ModelView_base():
         "industry": {"type": "ellip1", "width": 100},
         "url_html": {"type": "ellip1", "width": 200},
         "download_url_html": {"type": "ellip1", "width": 200},
-        "path":{"type": "ellip2", "width": 200},
+        # "path":{"type": "ellip2", "width": 200},
         "storage_class": {"type": "ellip1", "width": 100},
         "storage_size":{"type": "ellip1", "width": 100},
         "file_type":{"type": "ellip1", "width": 100},
@@ -73,7 +90,7 @@ class Dataset_ModelView_base():
         "years": {"type": "ellip2", "width": 100},
         "usage": {"type": "ellip1", "width": 200},
         "research": {"type": "ellip2", "width": 100},
-        "icon_html": {"type": "ellip1", "width": 100},
+        "icon_html": {"type": "ellip1", "width": 100}
     }
 
     add_form_extra_fields = {
@@ -98,6 +115,11 @@ class Dataset_ModelView_base():
             widget=MyBS3TextAreaFieldWidget(),
             validators=[DataRequired()]
         ),
+        # "dataset_file": FileUploadField(
+        #     label= 'File',
+        #     filemanager = FileManager,
+        #     widget= BS3FileUploadFieldWidget()
+        # ),
         "industry": SelectField(
             label=_(datamodel.obj.lab('industry')),
             description='行业分类',
@@ -190,9 +212,76 @@ class Dataset_ModelView_base():
     #     flash(Markup('可批量删除不使用的数据集,可批量上传自产数据集'),category='info')
     #     return items
 
-class Dataset_ModelView_Api(Dataset_ModelView_base,MyappModelRestApi):
+
+    # @action("dataset_upload", text="上传数据", confirmation="开始上传",  multiple=False, single=True)
+    # def dataset_upload(self):
+    #     pass
+    # 下载
+    @expose('/download/<filename>', methods=['GET', 'POST'])
+    def download(self, filename):
+        if request.method == "GET":
+            #通过文件名下载文件
+            # filename = secure_filename(filename)        # secure_filename 获取文件夹名的安全版本
+            download_path = os.path.join(app.config['UPLOAD_FOLDER'], str(g.user.get_id()))  
+            # app.logger.info(download_path)
+            if download_path:
+                return send_from_directory(download_path, filename, as_attachment=True)
+            else:
+                flash('数据集不存在')
+                return 'error'
+        else:
+            return '下载失败'
+    
+    # flash('no task', 'warning')
+    # return redirect('/pipeline_modelview/web/%s' % pipeline.id)
+    
+    
+    # 跳转上传页面
+    @expose('/upload_dataset_page/<id>/<name>', methods=['GET', 'POST']) 
+    def upload_dataset_page(self, id, name):
+        return self.render_template('upload.html', id=id, name=name)
+    
+    # 上传
+    @expose('/upload_dataset/<id>', methods=['GET', 'POST'])
+    def upload_dataset(self, id):
+        if request.method == 'POST':
+            f = request.files['file']
+            # app.logger.info(request.files)
+            if f.filename == '':
+                return '文件名为空'
+            UPLOAD_FOLDER = app.config.get("UPLOAD_FOLDER")
+            secure_f = secure_filename(f.filename)        # secure_filename 获取文件夹名的安全版本
+            # file_type = os.path.splitext(secure_f)[-1]    # 获得文件后缀
+            user_upload_path = os.path.join(UPLOAD_FOLDER, str(g.user.get_id()))    # 用户个人文件夹
+            try:
+                if not os.path.exists(user_upload_path):
+                    os.makedirs(user_upload_path)
+            except Exception as e:
+                print(e)
+            file_name = str(id) + '_' + secure_f
+            file_path = os.path.join(user_upload_path, file_name) 
+            # 上传
+            f.save(file_path)
+            # 修改文件名
+            dataset = db.session.query(Dataset).filter_by(id=id).first()
+            dataset.dataset_file = file_name
+            db.session.commit()
+            return '上传成功, 保存的文件名为:' + file_path
+        else:
+            return '上传失败'
+
+        
+class Dataset_ModelView_Api(Dataset_ModelView_base, MyappModelRestApi):
     datamodel = SQLAInterface(Dataset)
     route_base = '/dataset_modelview/api'
-
 appbuilder.add_api(Dataset_ModelView_Api)
+
+
+class Dataset_ModelView(Dataset_ModelView_base, MyappModelView):
+    datamodel = SQLAInterface(Dataset)
+appbuilder.add_view_no_menu(Dataset_ModelView)
+
+
+
+
 
