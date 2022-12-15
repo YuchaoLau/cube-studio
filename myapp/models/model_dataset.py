@@ -77,7 +77,7 @@ class Dataset(Model,AuditMixinNullable,MyappModelBase):
 
     # 上传
     def upload_dataset(self):
-        return Markup(f'<a target=_blank href="/dataset_modelview/upload_dataset_page/{self.id}/{self.name}">点击上传</a>')
+        return Markup(f'<a href="/dataset_modelview/upload_dataset_page/{self.id}/{self.name}">点击上传</a>')
     
 
     def download(self):

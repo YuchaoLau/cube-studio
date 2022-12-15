@@ -13,14 +13,14 @@
 {% block content %}
 
 <div>
-  <h3>数据集名称：{{name}}</h3>
+  <h3>数据集：{{name}}</h3>
   <div>
     <div class="dropzone" id="myDropzone"">
-      <div class="am-text-success dz-message">
-        拖拽文件<br>或点击上传文件<br><br>支持文件类型：zip，rar，tar，jar，gz
-      </div>
+      <div class=" am-text-success dz-message">
+      拖拽文件<br>或点击上传文件<br><br>支持文件类型：zip，rar，tar，jar，gz
     </div>
   </div>
+</div>
 </div>
 
 <script type="application/javascript">
@@ -28,13 +28,22 @@
     paramName: "file",
     // chunking: true,
     // forceChunking: true,
+    // chunkSize: 2000000 // bytes 
     url: "/dataset_modelview/upload_dataset/{{id}}",
     maxFilesize: 10 * 1024, //  单位：M
     maxFiles: 1,           //一次性上传的文件数量上限
     acceptedFiles: ".rar,.zip,.tar,.jar,.gz在,.png",
     dictMaxFilesExceeded: "一次最多只能上传1个文件！",
-    dictFileTooBig:"可添加的最大文件大小为{{10 * 1024}}Mb，当前文件大小为{{filesize}}Mb ",
-    // chunkSize: 2000000 // bytes 
+    dictFileTooBig: "可添加的最大文件大小为{{10 * 1024}}Mb，当前文件大小为{{filesize}}Mb ",
+    init: function () {
+      this.on("addedfile", file => {
+        console.log("A file has been added");
+      });
+      this.on("success", file => {
+        alert('上传成功, 返回')
+        window.location.replace('http://10.10.20.233:3000/frontend/dataleap/media_data/dataset')
+      });
+    }
   }
 </script>
 {% endblock %}

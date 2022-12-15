@@ -15,7 +15,7 @@ from .base import MyappModelView
 from flask import g
 from myapp.models.model_dataset import Dataset
 import os
-
+from flask import make_response
 
 # from flask import render_template
 # from flask_appbuilder.views import ModelView
@@ -67,7 +67,7 @@ class Dataset_ModelView_base():
     
 
     edit_columns = add_columns
-    list_columns = ['icon_html','name','label', 'upload_dataset', 'download', 'describe', 'source_type','source','status','industry','field','url_html','download_url_html','usage','research','storage_class','file_type','years','path','storage_size','entries_num','duration','price','owner']
+    list_columns = ['id', 'icon_html','name','label', 'upload_dataset', 'download', 'describe', 'source_type','source','status','industry','field','url_html','download_url_html','usage','research','storage_class','file_type','years','path','storage_size','entries_num','duration','price','owner']
     cols_width = {
         "name": {"type": "ellip1", "width": 200},
         "label": {"type": "ellip2", "width": 250},
@@ -213,9 +213,6 @@ class Dataset_ModelView_base():
     #     return items
 
 
-    # @action("dataset_upload", text="上传数据", confirmation="开始上传",  multiple=False, single=True)
-    # def dataset_upload(self):
-    #     pass
     # 下载
     @expose('/download/<filename>', methods=['GET', 'POST'])
     def download(self, filename):
@@ -225,13 +222,36 @@ class Dataset_ModelView_base():
             download_path = os.path.join(app.config['UPLOAD_FOLDER'], str(g.user.get_id()))  
             # app.logger.info(download_path)
             if download_path:
-                return send_from_directory(download_path, filename, as_attachment=True)
+                try:
+                    # as_attachment=True的参数的话，那么就可以将文件作为一个待下载的文件发送给客户端
+                    return send_from_directory(download_path, filename, as_attachment=True)
+                except Exception as e:
+                    print(e)
             else:
-                flash('数据集不存在')
-                return 'error'
+                return '文件不存在'
         else:
             return '下载失败'
     
+    # 下载
+    @expose('/download_from_script/<id>', methods=['GET', 'POST'])
+    def download_from_script(self, id):
+        if request.method == "GET":
+            download_path = os.path.join(app.config['UPLOAD_FOLDER'], str(g.user.get_id())) 
+            # 查询 id 是否存在
+            dataset = db.session.query(Dataset).filter_by(id=id).first()
+            if not dataset:
+                return self.response(404)
+            # 查询 文件名 是否存在
+            if dataset.dataset_file:
+                filename = dataset.dataset_file
+            else:
+                return self.response(404)
+            try:
+                return send_from_directory(download_path, filename, as_attachment=True)
+            except Exception as e:
+                print(e)
+        else:
+            return '下载失败'
     # flash('no task', 'warning')
     # return redirect('/pipeline_modelview/web/%s' % pipeline.id)
     
@@ -249,6 +269,10 @@ class Dataset_ModelView_base():
             # app.logger.info(request.files)
             if f.filename == '':
                 return '文件名为空'
+            # 查询 id 是否存在
+            dataset = db.session.query(Dataset).filter_by(id=id).first()
+            if not dataset:
+                return '数据集id不存在'
             UPLOAD_FOLDER = app.config.get("UPLOAD_FOLDER")
             secure_f = secure_filename(f.filename)        # secure_filename 获取文件夹名的安全版本
             # file_type = os.path.splitext(secure_f)[-1]    # 获得文件后缀
@@ -260,16 +284,24 @@ class Dataset_ModelView_base():
                 print(e)
             file_name = str(id) + '_' + secure_f
             file_path = os.path.join(user_upload_path, file_name) 
-            # 上传
-            f.save(file_path)
-            # 修改文件名
-            dataset = db.session.query(Dataset).filter_by(id=id).first()
+            # 上传，写到磁盘
+            try:
+                f.save(file_path)
+            except Exception as e:
+                print(e)
+            # 修改文件名 
             dataset.dataset_file = file_name
             db.session.commit()
-            return '上传成功, 保存的文件名为:' + file_path
+            return '上传成功'
         else:
             return '上传失败'
-
+    
+    
+    # @expose('/label_studio/')  #这里指定了接收的username的类型,如果不符合会报错,
+    # def label_studio(self):  
+    #     url = 'http://10.10.20.233:8089/user/login/?next=/projects/'
+    #     return redirect(url)
+        
         
 class Dataset_ModelView_Api(Dataset_ModelView_base, MyappModelRestApi):
     datamodel = SQLAInterface(Dataset)
@@ -280,8 +312,5 @@ appbuilder.add_api(Dataset_ModelView_Api)
 class Dataset_ModelView(Dataset_ModelView_base, MyappModelView):
     datamodel = SQLAInterface(Dataset)
 appbuilder.add_view_no_menu(Dataset_ModelView)
-
-
-
 
 

@@ -264,9 +264,10 @@ class Myapp(BaseMyappView):
                                 # "name": 'test',
                                 "title": '数据标注平台', 
                                 "icon": '<svg t="1658320508784" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3263" width="200" height="200"><path d="M875.65 912h-380a36 36 0 0 1 0-72h380a36 36 0 1 1 0 72zM812.26 284.82L285.39 811.69l-88.11 15.1L212 738l526.72-526.72 73.54 73.54m90.51-11.31L750 120.77a16 16 0 0 0-22.62 0L152.5 695.68a34.11 34.11 0 0 0-9.5 18.56l-25.95 156.23a32 32 0 0 0 37 36.78l155.38-26.62a34.2 34.2 0 0 0 18.38-9.52l575-575a16 16 0 0 0 0-22.63z" p-id="3264"></path></svg>',
-                                "menu_type": "out_link",
+                                "menu_type": "link",
                                 # "url": 'https://www.baidu.com/'
                                 "url": 'http://10.10.20.233:8089/'
+                                # "url": '/dataset_modelview/label_studio/'
                             },
                             {
                                 "name": 'dataset-test',
@@ -1056,10 +1057,6 @@ class Myapp(BaseMyappView):
     # @expose('/upload_dataset_page/<id>/<name>') 
     # def upload_download_dataset_page(self, id=None, name=None):
     #     return self.render_template('upload.html', id=id, name=name)
-
-    # @expose('/download_dataset_page') 
-    # def download_dataset_page(self):
-    #     return self.render_template('download.html')
     
 # add_view_no_menu添加视图，但是没有菜单栏显示 
 appbuilder.add_view_no_menu(Myapp)
