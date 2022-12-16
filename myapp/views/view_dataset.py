@@ -228,7 +228,7 @@ class Dataset_ModelView_base():
                 except Exception as e:
                     print(e)
             else:
-                return '文件不存在'
+                return '文件路径不存在'
         else:
             return '下载失败'
     
@@ -296,11 +296,6 @@ class Dataset_ModelView_base():
         else:
             return '上传失败'
     
-    
-    # @expose('/label_studio/')  #这里指定了接收的username的类型,如果不符合会报错,
-    # def label_studio(self):  
-    #     url = 'http://10.10.20.233:8089/user/login/?next=/projects/'
-    #     return redirect(url)
         
         
 class Dataset_ModelView_Api(Dataset_ModelView_base, MyappModelRestApi):
